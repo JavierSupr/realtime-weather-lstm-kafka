@@ -3,29 +3,29 @@ import json
 import requests
 import time
 
-#URL = "https://api.open-meteo.com/v1/forecast?latitude=-6.2349&longitude=106.9896&hourly=temperature_2m&timezone=Asia%2FBangkok&past_days=1&forecast_days=1"
-URL = "https://api.open-meteo.com/v1/forecast?latitude=-6.2349&longitude=106.9896&hourly=temperature_2m&past_days=31&forecast_days=1"
+URL = "https://api.open-meteo.com/v1/forecast?latitude=-6.2349&longitude=106.9896&hourly=temperature_2m&past_days=1&forecast_days=1"
+
 producer = KafkaProducer(
-    bootstrap_servers=['localhost:9092'], value_serializer=lambda v: json.dumps(v).encode("utf-8")
+    bootstrap_servers=['localhost:9092'],
+    value_serializer=lambda v: json.dumps(v).encode("utf-8")
 )
 
 topic = "weather-data"
 
+sent_times = set()
+
 while True:
-    try:
-        r = requests.get(URL)
-        
-        data = r.json()
+    r = requests.get(URL)
+    data = r.json()
+    times = data["hourly"]["time"]
+    temps = data["hourly"]["temperature_2m"]
 
-        feature = {
-            "temperature": data["hourly"]["temperature_2m"]
-        }
-        print("Data berhasil terkirim!")
+    for t, temp in zip(times, temps):
+        if t not in sent_times:  
+            feature = {"timestamp": t, "weather": temp}
+            producer.send(topic, feature)
+            sent_times.add(t)
+            print("Data terkirim:", feature)
 
-        producer.send(topic, feature)
-        producer.flush()
-        
-    except Exception as e:
-        print("Error:", e)
-    
-    time.sleep(5)
+    producer.flush()
+    time.sleep(3600)
