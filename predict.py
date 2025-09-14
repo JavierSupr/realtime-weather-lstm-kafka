@@ -7,13 +7,17 @@ import matplotlib.pyplot as plt
 from keras.models import Sequential
 from keras.layers import LSTM, Dense, Bidirectional
 from sklearn.preprocessing import MinMaxScaler
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
 
 DB_CONFIG = {
-    "dbname": "weather-data",
-    "user": "postgres",
-    "password": "Javier@20",
-    "host": "localhost",
-    "port": 5432
+    "dbname": os.getenv("DB_NAME"),
+    "user": os.getenv("DB_USER"),
+    "password": os.getenv("DB_PASSWORD"),
+    "host": os.getenv("DB_HOST"),
+    "port": os.getenv("DB_PORT", 5432)
 }
 
 def get_data():
