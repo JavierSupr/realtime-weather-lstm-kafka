@@ -1,13 +1,16 @@
 from kafka import KafkaConsumer
 import psycopg2
 import json
+from dotenv import load_dotenv
+import os
 
+load_dotenv()
 
 conn = psycopg2.connect(
-    host="localhost",
-    database="weather-data",
-    user="postgres",
-    password="Javier@20"
+    host=os.getenv("DB_HOST"),
+    database=os.getenv("DB_NAME"),
+    user=os.getenv("DB_USER"),
+    password=os.getenv("DB_PASSWORD")
 )
 
 cursor = conn.cursor()
